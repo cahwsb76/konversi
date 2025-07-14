@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Konversi Harga per Kg</title>
+  <link rel="stylesheet" href="./output.css" />
+</head>
+<body class="bg-black min-h-screen flex flex-col items-center py-10 text-yellow-100">
+  <h1 class="text-2xl font-bold mb-6 text-yellow-300">Tabel Harga per Kg & Ons</h1>
+  <div class="mb-4 flex flex-col sm:flex-row gap-2 items-center">
+    <label for="hargaBeli" class="font-medium text-yellow-200">Harga Beli per 1 kg (Rp):</label>
+    <input id="hargaBeli" type="number" value="140000" class="border border-yellow-400 bg-black text-yellow-100 rounded px-2 py-1 w-40 focus:outline-none focus:ring-2 focus:ring-yellow-400" min="0" step="100">
+    <label for="hargaJual" class="font-medium text-yellow-200 ml-0 sm:ml-4">Harga Jual per 1 kg (Rp):</label>
+    <input id="hargaJual" type="number" value="150000" class="border border-yellow-400 bg-black text-yellow-100 rounded px-2 py-1 w-40 focus:outline-none focus:ring-2 focus:ring-yellow-400" min="0" step="100">
+    <label for="inputKg" class="font-medium text-yellow-200 ml-0 sm:ml-4">Jumlah kilo (kg):</label>
+    <input id="inputKg" type="number" placeholder="cth: 0.5" class="border border-yellow-400 bg-black text-yellow-100 rounded px-2 py-1 w-32 focus:outline-none focus:ring-2 focus:ring-yellow-400" min="0.001" step="0.001">
+  </div>
+
+  
+  <div class="overflow-x-auto w-full max-w-2xl mb-8">
+    <h2 class="text-lg font-semibold text-yellow-200 mb-2 text-center">Tabel Harga, Laba, dan Konversi Satuan</h2>
+    <table class="min-w-full bg-black shadow rounded-lg border border-yellow-400 text-sm">
+      <thead>
+        <tr class="bg-yellow-900 text-yellow-200 text-center">
+          <th class="py-2 px-4 border-b border-yellow-400">Harga Beli (Rp)</th>
+          <th class="py-2 px-4 border-b border-yellow-400">Harga Jual (Rp)</th>
+          <th class="py-2 px-4 border-b border-yellow-400">Laba (Rp)</th>
+          <th class="py-2 px-4 border-b border-yellow-400">Kilogram (kg)</th>
+          <th class="py-2 px-4 border-b border-yellow-400">Ons</th>
+          <th class="py-2 px-4 border-b border-yellow-400">Gram</th>
+        </tr>
+      </thead>
+      <tbody id="tabelKonversi">
+        <!-- Baris tabel akan diisi oleh JavaScript -->
+      </tbody>
+    </table>
+  </div>
+
+  <div class="overflow-x-auto w-full max-w-2xl mb-8">
+    <h2 class="text-lg font-semibold text-yellow-200 mb-2 text-center">Tabel Konversi Kilo, Ons, dan Gram</h2>
+    <table class="min-w-full bg-black shadow rounded-lg border border-yellow-400 text-sm">
+      <thead>
+        <tr class="bg-yellow-800 text-yellow-100 text-center">
+          <th class="py-2 px-4 border-b border-yellow-400">Kilo</th>
+          <th class="py-2 px-4 border-b border-yellow-400">Ons</th>
+          <th class="py-2 px-4 border-b border-yellow-400">Gram</th>
+        </tr>
+      </thead>
+      <tbody id="tabelKiloOnsGram">
+        <!-- Baris tabel akan diisi oleh JavaScript -->
+      </tbody>
+    </table>
+  </div>
+
+
+  <script>
+    function formatRupiah(angka) {
+      return angka.toLocaleString('id-ID');
+    }
+
+    function renderTable(hargaBeliPerKg, hargaJualPerKg, inputKg) {
+      const tbody = document.getElementById('tabelKonversi');
+      tbody.innerHTML = '';
+      const satuan = [
+        { label: '1/4 ons', ons: 0.25, kg: 0.025 },
+        { label: '1/2 ons', ons: 0.5, kg: 0.05 },
+        { label: '3/4 ons', ons: 0.75, kg: 0.075 },
+        { label: '1 ons', ons: 1, kg: 0.1 },
+        { label: '1/4 kg', ons: 2.5, kg: 0.25 },
+        { label: '1/2 kg', ons: 5, kg: 0.5 },
+        { label: '3/4 kg', ons: 7.5, kg: 0.75 },
+        { label: '1 kg', ons: 10, kg: 1 },
+      ];
+      if (inputKg && Number(inputKg) > 0) {
+        // Tampilkan hanya satu baris untuk input kg berapapun
+        const faktor = parseFloat(inputKg);
+        const item = { kg: 1, ons: 10, label: faktor + ' kg' };
+        const hargaBeli = faktor * hargaBeliPerKg;
+        const hargaJual = faktor * hargaJualPerKg;
+        const laba = hargaJual - hargaBeli;
+        const gram = faktor * 1000;
+        const kg = faktor;
+        const ons = faktor * 10;
+        const onsLabel = ons.toLocaleString('id-ID', { minimumFractionDigits: 3 }) + ' ons';
+        // Pada tabel utama, kolom ons selalu tampil desimal 3 digit
+        const onsDesimal = ons.toLocaleString('id-ID', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+        tbody.innerHTML += `
+          <tr class="text-center border-b border-yellow-400 hover:bg-yellow-900/30">
+            <td class="py-2 px-4">Rp ${formatRupiah(hargaBeli)}</td>
+            <td class="py-2 px-4">Rp ${formatRupiah(hargaJual)}</td>
+            <td class="py-2 px-4 font-semibold text-yellow-300">Rp ${formatRupiah(laba)}</td>
+            <td class="py-2 px-4">${kg.toLocaleString('id-ID', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} kg</td>
+            <td class="py-2 px-4">${onsDesimal} ons</td>
+            <td class="py-2 px-4">${gram.toLocaleString('id-ID', { minimumFractionDigits: 0 })} gram</td>
+          </tr>
+        `;
+        return;
+      }
+      satuan.forEach(item => {
+        let faktor = 1;
+        if (inputKg && inputKg > 0) {
+          faktor = parseFloat(inputKg);
+        }
+        // Jika inputKg >= 1 dan bilangan bulat, hanya tampilkan baris satuan '1 kg'
+        if (inputKg && Number(inputKg) >= 1 && Number.isInteger(Number(inputKg))) {
+          if (item.kg !== 1) return; // skip selain 1 kg
+          // label ons tetap 10 ons
+        }
+        const hargaBeli = item.kg * hargaBeliPerKg * faktor;
+        const hargaJual = item.kg * hargaJualPerKg * faktor;
+        const laba = hargaJual - hargaBeli;
+        const gram = item.kg * 1000 * faktor;
+        const kg = item.kg * faktor;
+        const ons = item.ons * faktor;
+        let onsLabel = item.label;
+        if (faktor !== 1) {
+          const pecahan = item.label.match(/([0-9]+)\/?([0-9]*) ons/);
+          if (pecahan) {
+            let pembilang = parseFloat(pecahan[1]);
+            let penyebut = pecahan[2] ? parseFloat(pecahan[2]) : 1;
+            let total = pembilang * faktor;
+            if (Number.isInteger(total) && penyebut !== 1) {
+              onsLabel = `${total}/${penyebut} ons`;
+            } else if (Number.isInteger(total) && penyebut === 1) {
+              onsLabel = `${total} ons`;
+            } else {
+              onsLabel = ons.toLocaleString('id-ID', { minimumFractionDigits: 3 }) + ' ons';
+            }
+          } else {
+            onsLabel = ons.toLocaleString('id-ID', { minimumFractionDigits: 3 }) + ' ons';
+          }
+        }
+        tbody.innerHTML += `
+          <tr class="text-center border-b border-yellow-400 hover:bg-yellow-900/30">
+            <td class="py-2 px-4">Rp ${formatRupiah(hargaBeli)}</td>
+            <td class="py-2 px-4">Rp ${formatRupiah(hargaJual)}</td>
+            <td class="py-2 px-4 font-semibold text-yellow-300">Rp ${formatRupiah(laba)}</td>
+            <td class="py-2 px-4">${kg.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 3 })} kg</td>
+            <td class="py-2 px-4">${onsLabel}</td>
+            <td class="py-2 px-4">${gram.toLocaleString('id-ID', { minimumFractionDigits: 0 })} gram</td>
+          </tr>
+        `;
+      });
+
+      // Tabel Kilo, Ons, Gram Saja
+      const tbodyKOG = document.getElementById('tabelKiloOnsGram');
+      tbodyKOG.innerHTML = '';
+      if (inputKg && Number(inputKg) > 0) {
+        const faktor = parseFloat(inputKg);
+        const kg = faktor;
+        const ons = faktor * 10;
+        const gram = faktor * 1000;
+        // Cari label pecahan jika cocok
+        let onsLabel = ons.toLocaleString('id-ID', { minimumFractionDigits: 3 }) + ' ons';
+        const satuanMatch = satuan.find(item => Math.abs(item.kg - faktor) < 0.0001);
+        if (satuanMatch) {
+          onsLabel = satuanMatch.label;
+        }
+        tbodyKOG.innerHTML += `
+          <tr class="text-center border-b border-yellow-400 hover:bg-yellow-900/30">
+            <td class="py-2 px-4">${kg.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 3 })} kg</td>
+            <td class="py-2 px-4">${onsLabel}</td>
+            <td class="py-2 px-4">${gram.toLocaleString('id-ID', { minimumFractionDigits: 0 })} gram</td>
+          </tr>
+        `;
+      } else {
+        satuan.forEach(item => {
+          const kg = item.kg;
+          const onsLabel = item.label;
+          const gram = item.kg * 1000;
+          tbodyKOG.innerHTML += `
+            <tr class="text-center border-b border-yellow-400 hover:bg-yellow-900/30">
+              <td class="py-2 px-4">${kg.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 3 })} kg</td>
+              <td class="py-2 px-4">${onsLabel}</td>
+              <td class="py-2 px-4">${gram.toLocaleString('id-ID', { minimumFractionDigits: 0 })} gram</td>
+            </tr>
+          `;
+        });
+      }
+    }
+
+    // Inisialisasi tabel
+    const hargaBeliInput = document.getElementById('hargaBeli');
+    const hargaJualInput = document.getElementById('hargaJual');
+    const kiloInput = document.getElementById('inputKg');
+    function updateTable() {
+      renderTable(Number(hargaBeliInput.value), Number(hargaJualInput.value), kiloInput.value);
+    }
+    updateTable();
+    hargaBeliInput.addEventListener('input', updateTable);
+    hargaJualInput.addEventListener('input', updateTable);
+    kiloInput.addEventListener('input', updateTable);
+  </script>
+</body>
+</html>
